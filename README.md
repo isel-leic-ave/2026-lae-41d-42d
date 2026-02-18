@@ -1,5 +1,6 @@
 # Languages and Managed Runtimes 2026
 
+* [Slack](https://isel-leic-lae.slack.com) - Use your ISEL email address (e.g. a87956@alunos.isel.pt) and join the channel of your classroom (e.g. #2025-leic-42d-gamboa)
 * [Lessons](https://github.com/isel-leic-ave/2026-lae-41d-42d/wiki/lessons)
 * [Evaluation _em português_](https://github.com/isel-leic-ave/2026-lae-41d-42d/wiki/evaluation)
 * [Bibliography and Tools](https://github.com/isel-leic-ave/2026-lae-41d-42d/wiki/bibliography)
