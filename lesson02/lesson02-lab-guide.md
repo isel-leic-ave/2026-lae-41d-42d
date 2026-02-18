@@ -165,6 +165,9 @@ should be:
 * Test framework: kotlin.test
 * Generate build using new APIs and behavior: No
 
+Follow the instructions below using the command-line terminal and answer the
+corresponding questions:
+
 1. Edit the file located at `/gradle/wrapper/gradle-wrapper.properties` and
    change the value of `distributionUrl` to:
    `https\://services.gradle.org/distributions/gradle-9.3.1-bin.zip`
