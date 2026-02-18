@@ -128,9 +128,10 @@ fun main() {
    * Explain the reason of the observed error?
 4. Look for the location folder of the Kotlin SDK installation and include the
    path to the `kotlin-stdlib.jar` in classpath (through `-cp` option) to
-   execute `AppKt` in command line.  
+   execute `AppKt` in command line with the `java` tool successfully.  
    Note you should include both in the classpath, the current folder and the `kotlin-stdlib.jar`, 
    such as `-cp .:kotlin-stdlib.jar` or `-cp .;kotlin-stdlib.jar`, separating with `:` or `;` for windows based OS (replace `kotlin-stdlib.jar` with the full path).
+   * Explain what the kotlin tool does automatically when running the program, and why this step is necessary when using java directly.
 
 ---
 
