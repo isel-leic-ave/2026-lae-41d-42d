@@ -10,6 +10,20 @@ such as Notepad, or Visual Studio Code, or other.**
 
 ---
 
+## **Table of Contents**
+
+### **Part 1: Simple Java & Kotlin Interoperability**
+* [Step 0: Setup](#step-0-setup)
+* [Step 1: Java classes](#step-1-java-classes)
+* [Step 2: Kotlin main file](#step-2-kotlin-main-file)
+
+### **Part 2: Gradle Build Tool**
+* [Step 0: Setup](#step-0-setup-1)
+* [Step 1: Multi-module Project](#step-1-multi-module-project)
+* [Step 2: Add a Java module](#step-2-add-a-java-module)
+
+---
+
 ## **Part 1:  Simple Java & Kotlin Interoperability**
 
 ### **Step 0: Setup**
