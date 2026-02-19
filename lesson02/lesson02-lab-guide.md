@@ -137,7 +137,7 @@ fun main() {
 
 ## **Part 2: Gradle Build Tool**
 
-## **Part 0: Setup**
+### **Step 0: Setup**
 
 1. Make sure the following command-line tools are installed and accessible from your terminal:
 
