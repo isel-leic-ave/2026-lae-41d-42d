@@ -1,7 +1,10 @@
 # **Lab Guide: Java Type System**
 
 **Objectives:**
-* 
+
+* Understand the fundamentals of the Java type system and how it relates to the
+  Kotlin type system.
+* Explore the differences in metadata and bytecode between Kotlin and Java classes.
 
 **This guide must be completed without IntelliJ. Use a lightweight text editor
 such as Notepad, or Visual Studio Code, or other.**
