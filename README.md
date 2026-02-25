@@ -5,6 +5,7 @@
   * Individual 42d - https://classroom.github.com/a/MfIupevU
 * Github Classroom for Project submission:
   * Groups 41d - https://classroom.github.com/a/ZHEsH4sU
+  * Groups 42d - https://classroom.github.com/a/ZdvQr2TU
 * [Slack](https://isel-leic-lae.slack.com) - Use your ISEL email address (e.g. a87956@alunos.isel.pt) and join the channel of your classroom (e.g. #2025-leic-42d-gamboa)
 * [Lessons](https://github.com/isel-leic-ave/2026-lae-41d-42d/wiki/lessons)
 * [Evaluation _em português_](https://github.com/isel-leic-ave/2026-lae-41d-42d/wiki/evaluation)
