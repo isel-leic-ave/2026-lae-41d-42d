@@ -84,7 +84,7 @@ such as Notepad, or Visual Studio Code, or other.**
     of a java class constructor and a kotlin class initializer? Why?
 
 16. Given your analysis in the previous questions, do you need to fix your
-    response to question 4 and 8? Why?
+    response to question 3? Why?
 
 ## Part 3: Kotlin to Java type system
 
