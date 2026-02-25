@@ -101,3 +101,15 @@ such as Notepad, or Visual Studio Code, or other.**
    to the `Account` class in Kotlin.  
    Confirm that the generated metadata of the Java class is equivalent to the one
    generated for the Kotlin class.
+
+## Final Conclusion
+
+Through this lab you should have learned:
+* Kotlin compiles directly to JVM bytecode.
+* Constructors and init blocks become <init> methods.
+* Kotlin classes are final by default.
+* Kotlin generates getters/setters automatically.
+* The JVM sees Kotlin and Java classes almost identically.
+* Kotlin adds extra metadata for reflection and tooling.
+
+The differences are mainly language-level, not JVM-level.
