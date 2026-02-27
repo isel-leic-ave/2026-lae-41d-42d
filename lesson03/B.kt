@@ -2,7 +2,7 @@ class B {
     init { 
         println("Instantiating B");
     }
-    fun bar() {
-        println("Calling bar...");
-    }
+    // fun bar() {
+    //     println("Calling bar...");
+    // }
 }
