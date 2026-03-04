@@ -109,7 +109,7 @@ fun main() {
    
 2. Analyze each part of the Kotlin source code identifying each lambda in use.
 
-3. Analyze the metadata of `Utils` using `javap -p Utils.class` and identify what is the
+3. Analyze the metadata of `UtilsKt` using `javap -p UtilsKt.class` and identify what is the
    type of the `transform` parameter in the `cross` method?
 
 4. Analyze and register the metadata of the type of the `transform` parameter
