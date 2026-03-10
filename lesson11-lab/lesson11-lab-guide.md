@@ -69,8 +69,8 @@ functionality in **Kotlin**, including the unit tests.
 
 ## Part 3: Exploring Reflection in Kotlin
 
-Implement the extension function `membersToJson` (in `MembersToJson.kt`) using
-the Kotlin Reflection API.  
+Implement the extension function `membersToJson` using the Kotlin Reflection
+API.  
 This function encodes properties and non-void parameterless functions.  
 
 Follow the same steps as in Part 2 to implement and test the `membersToJson()`
