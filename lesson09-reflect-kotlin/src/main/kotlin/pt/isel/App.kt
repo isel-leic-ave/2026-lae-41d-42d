@@ -1,40 +1,34 @@
 package pt.isel
 
 import java.net.URI
-import java.time.LocalDate
 import kotlin.reflect.KCallable
 import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
 import kotlin.reflect.KParameter.Kind.INSTANCE
-import kotlin.reflect.KVisibility
 import kotlin.reflect.KVisibility.PUBLIC
 import kotlin.reflect.full.memberFunctions
-import kotlin.reflect.full.memberProperties
 
 fun checkMembers(obj: Any) {
     obj::class
         .members
         .forEach { member: KCallable<*> ->
-            if(member is KFunction) {
+            if (member is KFunction) {
                 println("Func " + member.name)
             } else {
                 println("Prop " + member.name)
             }
-
         }
 }
 
 fun checkAndCallMethods(obj: Any) {
     obj::class
         .memberFunctions
-        .filter { it.parameters.size == 1 &&
+        .filter {
+            it.parameters.size == 1 &&
                 it.parameters[0].kind == INSTANCE &&
                 it.visibility == PUBLIC
-        }
-        .forEach { f ->
+        }.forEach { f ->
             println(f.name + ":" + f.returnType + "() ----> " + f.call(obj))
         }
-
 }
 
 fun main() {
