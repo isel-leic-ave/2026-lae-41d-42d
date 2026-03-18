@@ -161,3 +161,5 @@ JSON representation of the member's value, processing it.
 For example, if a property is annotated with
 `@ToJsonFormatter(DateFormatter::class)`, the DateFormatter class will be used
 to format the property's value into a JSON string.
+
+You should implement a different unit test for a different kind of formatter.
