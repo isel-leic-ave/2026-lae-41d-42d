@@ -4,6 +4,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.declaredMemberProperties
+import kotlin.reflect.full.findAnnotation
 
 fun Any.mapTo(dest: KClass<*>): Any {
     // 1st create instance of dest
@@ -20,7 +21,9 @@ fun Any.mapTo(dest: KClass<*>): Any {
                 .filter { prop -> prop is KMutableProperty<*> }
                 .map { prop -> prop as KMutableProperty<*> }
                 .firstOrNull {
-                    it.name == srcProp.name && it.returnType == srcProp.returnType
+                    val match = srcProp.findAnnotation<Match>()
+                    val name = match?.name ?: srcProp.name
+                    it.name == name && it.returnType == srcProp.returnType
                 }.also { destProp ->
                     val srcValue = srcProp.call(this)
                     destProp?.setter?.call(target, srcValue)

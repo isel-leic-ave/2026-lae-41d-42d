@@ -1,10 +1,13 @@
 package pt.isel
 
-import kotlin.reflect.KClass
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PersonDto(val name: String, val country: String, val born: Int )
+class PersonDto(
+    val name: String,
+    val country: String,
+    @Match(name = "bornYear") val born: Int,
+)
 
 class NaiveMapperTest {
     @Test
@@ -15,6 +18,6 @@ class NaiveMapperTest {
         // Only copy properties with the same name and type
         assertEquals(dto.name, actual.name)
         assertEquals(dto.country, actual.country)
-        assertEquals(0, actual.bornYear)
+        assertEquals(2001, actual.bornYear)
     }
 }
