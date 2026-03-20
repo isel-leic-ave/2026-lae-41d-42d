@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class PersonDto(
     val name: String,
     val country: String,
-    @Match("bornYear") born: Int,
+    @Match("bornYear") val born: Int,
 )
 
 class NaiveMapperTest {
@@ -16,6 +16,6 @@ class NaiveMapperTest {
         val person = dto.mapTo(Person::class) as Person
         assertEquals("Maria", person.name)
         assertEquals("Portugal", person.country)
-        assertEquals(0, person.bornYear)
+        assertEquals(2001, person.bornYear)
     }
 }

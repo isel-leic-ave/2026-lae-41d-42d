@@ -3,6 +3,7 @@ package pt.isel
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.createInstance
+import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
 fun Any.mapTo(dest: KClass<*>): Any {
@@ -19,7 +20,11 @@ fun Any.mapTo(dest: KClass<*>): Any {
                 .memberProperties
                 .filter { it is KMutableProperty<*> }
                 .map { it as KMutableProperty<*> }
-                .firstOrNull { it.name == srcProp.name && it.returnType == srcProp.returnType }
+                .firstOrNull { destProp ->
+                    val match = srcProp.findAnnotation<Match>()
+                    val srcName = match?.name ?: srcProp.name
+                    srcName == destProp.name && destProp.returnType == srcProp.returnType
+                }
                 ?.also { destProp ->
                     val srcValue = srcProp.call(this)
                     destProp.setter.call(target, srcValue)
