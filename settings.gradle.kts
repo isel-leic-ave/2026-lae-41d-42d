@@ -14,5 +14,6 @@ rootProject.name = "2026-lae-41d-42d"
 include("lesson09-reflect-kotlin")
 include("lesson10-reflect-java")
 include("lesson12-domain-model")
-include("lesson12-naive-mapper")
+// include("lesson12-naive-mapper")
 include("lesson13-annotations")
+include("lesson15-naive-mapper-via-constructor")
