@@ -1,35 +1,61 @@
 package pt.isel
 
 import kotlin.reflect.KClass
-import kotlin.reflect.KMutableProperty
-import kotlin.reflect.full.createInstance
+import kotlin.reflect.KFunction
+import kotlin.reflect.KParameter
+import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberProperties
 
 fun Any.mapTo(dest: KClass<*>): Any {
-    // 1. Create an instance of dest
-    val target = dest.createInstance()
+    // 1st get properties of source
+    val srcProps = this::class.memberProperties
 
-    // For each property in source (i.e. this)
-    // look for a matching property in dest,
-    // i.e. same NAME and same TYPE
-    this::class
-        .memberProperties
-        .forEach { srcProp ->
-            dest
-                .memberProperties
-                .filter { it is KMutableProperty<*> }
-                .map { it as KMutableProperty<*> }
-                .firstOrNull { destProp ->
-                    val match = srcProp.findAnnotation<Match>()
-                    val srcName = match?.name ?: srcProp.name
-                    srcName == destProp.name && destProp.returnType == srcProp.returnType
+    // 2nd Look for a constructor in dest
+    // with a parameter for each property in source (this)
+    // Assume the remaining parameters are optional.
+    val destCtor: KFunction<Any> =
+        dest
+            .constructors
+            .first { destCtor ->
+                srcProps.all { srcProp ->
+                    destCtor.parameters.any { destParam ->
+                        matchProp(srcProp, destParam)
+                    }
                 }
-                ?.also { destProp ->
-                    val srcValue = srcProp.call(this)
-                    destProp.setter.call(target, srcValue)
-                }
+            }
+    // 3rd Select dest constructor parameters
+    val destCtorParams: Map<KParameter, KProperty<*>> =
+        srcProps.associateBy { srcProp ->
+            destCtor.parameters.first { matchProp(srcProp, it) }
         }
-    // 3. return dest instance
-    return target
+
+    // 4th instantiate test via destCtor call
+    return destCtor.callBy(
+        destCtorParams.entries.associate { (destParam, srcProp) ->
+            destParam to convert(this, srcProp, destParam)
+        },
+    )
+}
+
+private fun convert(
+    source: Any,
+    srcProp: KProperty<*>,
+    destParam: KParameter,
+): Any? {
+    val propValue = srcProp.call(source)
+    if(srcProp.returnType == destParam.type)
+        return propValue
+    else {
+        return propValue?.mapTo(destParam.type.classifier as KClass<*>)
+    }
+}
+
+private fun matchProp(
+    srcProp: KProperty<*>,
+    destParam: KParameter,
+): Boolean {
+    val match = srcProp.findAnnotation<Match>()
+    val srcName = match?.name ?: srcProp.name
+    return srcName == destParam.name
 }
