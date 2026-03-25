@@ -5,7 +5,9 @@ import kotlin.reflect.KFunction
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.typeOf
 
 fun Any.mapTo(dest: KClass<*>): Any {
     // 1st get properties of source
@@ -44,10 +46,23 @@ private fun convert(
     destParam: KParameter,
 ): Any? {
     val propValue = srcProp.call(source)
-    if(srcProp.returnType == destParam.type)
-        return propValue
-    else {
-        return propValue?.mapTo(destParam.type.classifier as KClass<*>)
+    return if (srcProp.returnType == destParam.type) {
+        propValue
+    } else if (srcProp.returnType.isSubtypeOf(typeOf<Number>()) ||
+        destParam.type.isSubtypeOf(typeOf<Number>())
+    ) {
+        throw IllegalStateException("Not allowed mapping between primitive types")
+    } else if (srcProp.returnType.isSubtypeOf(typeOf<Iterable<*>>()) &&
+        destParam.type.isSubtypeOf(typeOf<Iterable<*>>())
+    ) {
+        val destType =
+            destParam.type.arguments[0]
+                .type
+                ?.classifier as KClass<*>
+        (propValue as Iterable<*>)
+            .map { it?.mapTo(destType) }
+    } else {
+        propValue?.mapTo(destParam.type.classifier as KClass<*>)
     }
 }
 

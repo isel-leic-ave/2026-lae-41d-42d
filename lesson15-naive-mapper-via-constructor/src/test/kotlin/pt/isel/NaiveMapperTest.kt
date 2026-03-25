@@ -12,7 +12,13 @@ class PersonDto(
 class ArtistDto(
     val name: String,
     val kind: String,
-    val country: StateDto
+    val country: StateDto,
+    val tracks: List<SongDto>,
+)
+
+class SongDto(
+    val title: String,
+    val year: Int,
 )
 
 class StateDto(
@@ -32,11 +38,30 @@ class NaiveMapperTest {
 
     @Test
     fun `Test mapping to an immutable Artist`() {
-        val dto = ArtistDto("Muse", "Band", StateDto("UK", "en-UK"))
+        val songs =
+            listOf(
+                SongDto("Starlight", 2006),
+                SongDto("Uprising", 2009),
+                SongDto("Madness", 2012),
+            ).sortedBy { it.title }
+        val dto =
+            ArtistDto(
+                "Muse",
+                "Band",
+                StateDto("UK", "en-UK"),
+                songs,
+            )
         val artist = dto.mapTo(Artist::class) as Artist
         assertEquals("Muse", artist.name)
         assertEquals("Band", artist.kind)
-        assertEquals("en-UK", artist.country.idiom)
         assertEquals("UK", artist.country.name)
+        assertEquals("en-UK", artist.country.idiom)
+        artist
+            .tracks
+            .sortedBy { it.title }
+            .forEachIndexed { index, track ->
+                assertEquals(songs[index].title, track.title)
+                assertEquals(songs[index].year, track.year)
+            }
     }
 }
