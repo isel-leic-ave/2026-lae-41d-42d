@@ -12,6 +12,12 @@ class PersonDto(
 class ArtistDto(
     val name: String,
     val kind: String,
+    val country: StateDto,
+)
+
+class StateDto(
+    val name: String,
+    val idiom: String,
 )
 
 class NaiveMapperTest {
@@ -26,9 +32,11 @@ class NaiveMapperTest {
 
     @Test
     fun `Test mapping to an immutable Artist`() {
-        val dto = ArtistDto("Muse", "Band")
+        val dto = ArtistDto("Muse", "Band", StateDto("UK", "en-UK"))
         val artist = dto.mapTo(Artist::class) as Artist
         assertEquals("Muse", artist.name)
         assertEquals("Band", artist.kind)
+        assertEquals("en-UK", artist.country.idiom)
+        assertEquals("UK", artist.country.name)
     }
 }
