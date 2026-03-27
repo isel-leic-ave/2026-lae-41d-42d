@@ -4,7 +4,9 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
+import kotlin.reflect.typeOf
 
 fun Any.mapTo(dest: KClass<*>): Any {
     // 0. get the properties of the source type
@@ -30,19 +32,33 @@ fun Any.mapTo(dest: KClass<*>): Any {
         }
 
     // 3. Collect the arguments to pass to the constructor
-    val args: Map<KParameter, Any?> = params.entries.associate { (srcProp, destParam) ->
-        destParam to convert(this, srcProp, destParam)
-    }
+    val args: Map<KParameter, Any?> =
+        params.entries.associate { (srcProp, destParam) ->
+            destParam to convert(this, srcProp, destParam)
+        }
 
     // Call the constructor via Reflect that instantiates the object
     // and call the constructor
     return ctor.callBy(args)
 }
 
-fun convert(src: Any, srcProp: KProperty<*>, destParam: KParameter) : Any? {
+fun convert(
+    src: Any,
+    srcProp: KProperty<*>,
+    destParam: KParameter,
+): Any? {
     val srcValue = srcProp.call(src)
-    return if(srcProp.returnType == destParam.type) {
+    return if (srcProp.returnType == destParam.type) {
         srcValue
+    } else if (srcValue is Iterable<*> && destParam.type.isSubtypeOf(typeOf<Iterable<*>>())) {
+        srcValue.map { item ->
+            item?.mapTo(
+                destParam.type.arguments
+                    .first()
+                    .type
+                    ?.classifier as KClass<*>,
+            )
+        }
     } else {
         val destKlass = destParam.type.classifier as KClass<*>
         srcValue?.mapTo(destKlass)
