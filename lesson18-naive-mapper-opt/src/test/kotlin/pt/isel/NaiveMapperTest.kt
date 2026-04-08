@@ -30,7 +30,7 @@ class NaiveMapperTest {
     @Test
     fun `Test mapping PersonDto to Person`() {
         val dto = PersonDto("Maria", "Portugal", 2001)
-        val person = dto.mapTo(Person::class) as Person
+        val person = MapperOpt(PersonDto::class, Person::class).mapFrom(dto)
         assertEquals("Maria", person.name)
         assertEquals("Portugal", person.country)
         assertEquals(2001, person.bornYear)
@@ -51,7 +51,7 @@ class NaiveMapperTest {
                 StateDto("UK", "en-UK"),
                 songs,
             )
-        val artist = dto.mapTo(Artist::class) as Artist
+        val artist = MapperOpt(ArtistDto::class, Artist::class).mapFrom(dto)
         assertEquals("Muse", artist.name)
         assertEquals("Band", artist.kind)
         assertEquals("UK", artist.country.name)

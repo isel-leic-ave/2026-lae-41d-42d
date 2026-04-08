@@ -19,6 +19,9 @@ repositories {
 }
 
 dependencies {
+    // Add dependency to use the same Match annotation
+    implementation(project(":lesson15-naive-mapper-via-constructor"))
+
     // Kotlin Reflect API
     implementation(kotlin("reflect"))
 
