@@ -22,6 +22,9 @@ dependencies {
     // Kotlin Reflect API
     implementation(kotlin("reflect"))
 
+    // To use in MapperOpt the same Match annotation defined by NaiveMapper
+    implementation(project(":lesson15-naive-mapper-via-constructor"))
+
     // Use the Kotlin Test integration.
     testImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation(project(":lesson12-domain-model"))
