@@ -4,9 +4,13 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
 import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
-import kotlin.reflect.typeOf
+
+data class PropInfo(
+    val srcProp: KProperty<*>,
+    val destParam: KParameter,
+    val mapPropValue: (Any?) -> Any?,
+)
 
 class MapperOpt<T : Any, R : Any> private constructor(
     src: KClass<T>,
@@ -43,16 +47,18 @@ class MapperOpt<T : Any, R : Any> private constructor(
             }
 
     // 2. For each property associate the corresponding Parameter
-    val params: Map<KProperty<*>, KParameter> =
-        srcProps.associateWith { srcProp ->
-            ctor.parameters.first { match(srcProp, it) }
+    val params: List<PropInfo> =
+        srcProps.map { srcProp ->
+            val destParam = ctor.parameters.first { match(srcProp, it) }
+            PropInfo(srcProp, destParam, buildParseProp(srcProp, destParam))
         }
 
     fun mapFrom(src: T): R {
         // 3. Collect the arguments to pass to the constructor
         val args: Map<KParameter, Any?> =
-            params.entries.associate { (srcProp, destParam) ->
-                destParam to convert(src, srcProp, destParam)
+            params.associate { (srcProp, destParam, parseProp) ->
+                val propValue = srcProp.call(src)
+                destParam to parseProp(propValue)
             }
 
         // Call the constructor via Reflect that instantiates the object
@@ -61,31 +67,29 @@ class MapperOpt<T : Any, R : Any> private constructor(
     }
 }
 
-fun convert(
-    src: Any,
+@Suppress("UNCHECKED_CAST")
+fun buildParseProp(
     srcProp: KProperty<*>,
     destParam: KParameter,
-): Any? {
-    val srcValue = srcProp.call(src)
-    return if (srcProp.returnType == destParam.type) {
-        srcValue
-    } else if (srcValue is Iterable<*> && destParam.type.isSubtypeOf(typeOf<Iterable<*>>())) {
-        val srcKlass =
-            srcProp.returnType.arguments
-                .first()
-                .type
-                ?.classifier as KClass<Any>
-        val destKlass =
-            destParam.type.arguments
-                .first()
-                .type
-                ?.classifier as KClass<Any>
-        val mapper = MapperOpt(srcKlass, destKlass)
-        srcValue.map { item -> item?.let { mapper.mapFrom(item) } }
-    } else {
-        val srcKlass = srcProp.returnType.classifier as KClass<Any>
-        val destKlass = destParam.type.classifier as KClass<Any>
-        srcValue?.let { MapperOpt(srcKlass, destKlass).mapFrom(srcValue) }
+): (Any?) -> Any? {
+    val propType = srcProp.returnType
+    val paramType = destParam.type
+    if (propType == paramType) {
+        return { propValue -> propValue }
+    }
+    val propKlass = propType.classifier as KClass<Any>
+    val paramKlass = paramType.classifier as KClass<Any>
+    if (propKlass != List::class && paramKlass != List::class) {
+        val mapper = MapperOpt(propKlass, paramKlass)
+        return { propValue -> propValue?.let { mapper.mapFrom(propValue) } }
+    }
+    val propElemKlass = propType.arguments[0].type!!.classifier as KClass<Any>
+    val paramElemKlass = paramType.arguments[0].type!!.classifier as KClass<Any>
+    val mapper = MapperOpt(propElemKlass, paramElemKlass)
+    return { propValue ->
+        (propValue as List<*>).map {
+            it?.let { mapper.mapFrom(it) }
+        }
     }
 }
 
