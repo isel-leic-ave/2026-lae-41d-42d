@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * ./gradlew jmhJar
- * java -jar lesson18-JMH-microbench-mapper/build/libs/lesson18-JMH-microbench-mapper-jmh.jar -i 4 -wi 4 -f 1 -r 2 -w 2
+     * java -jar lesson18-JMH-microbench-mapper/build/libs/lesson18-JMH-microbench-mapper-jmh.jar -i 4 -wi 4 -f 1 -r 2 -w 2
  */
 @BenchmarkMode(Mode.AverageTime) // Measure execution time per operation
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
@@ -26,7 +26,7 @@ open class BenchMapper {
     fun reflectMapperPerson(): Person = dto.mapTo(Person::class) as Person
 
     @Benchmark
-    fun reflectMapperOptPerson(): Person = mapper.mapFrom(dto)
+    fun reflectMapperOptPerson(): Person = mapper.mapFrom(dto) as Person
 }
 
 /*

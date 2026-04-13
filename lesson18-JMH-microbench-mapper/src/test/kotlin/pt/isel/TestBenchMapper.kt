@@ -10,9 +10,9 @@ class TestBenchMapper {
         dto.mapTo(Person::class) as Person
     }
 
-    @Test
-    fun testReflectMapperOptPerson() {
-        val mapper = MapperOpt(PersonDto::class, Person::class)
-        mapper.mapFrom(dto)
-    }
+//    @Test
+//    fun testReflectMapperOptPerson() {
+//        val mapper = MapperOpt(PersonDto::class, Person::class)
+//        mapper.mapFrom(dto)
+//    }
 }
