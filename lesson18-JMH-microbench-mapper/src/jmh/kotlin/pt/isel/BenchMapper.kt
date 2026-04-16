@@ -30,6 +30,9 @@ open class BenchMapper {
             ).sortedBy { it.title },
         )
 
+    private val personMapper = MapperOpt(PersonDto::class, Person::class)
+    private val artistMapper = MapperOpt(ArtistDto::class, Artist::class)
+
     @Benchmark
     fun mapperPersonBaseline(): Person = ze.toPerson()
 
@@ -37,8 +40,14 @@ open class BenchMapper {
     fun mapperPersonReflect(): Person = ze.mapTo(Person::class) as Person
 
     @Benchmark
+    fun mapperPersonReflectOpt(): Person = personMapper.mapFrom(ze) as Person
+
+    @Benchmark
     fun mapperArtistBaseline(): Artist = muse.toArtist()
 
     @Benchmark
     fun mapperArtistReflect(): Artist = muse.mapTo(Artist::class) as Artist
+
+    @Benchmark
+    fun mapperArtistReflectOpt(): Artist = artistMapper.mapFrom(muse) as Artist
 }

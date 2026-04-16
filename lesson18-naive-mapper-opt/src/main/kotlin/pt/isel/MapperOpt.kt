@@ -8,9 +8,12 @@ import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.typeOf
 
-fun Any.mapTo(dest: KClass<*>): Any {
+class MapperOpt(
+    src: KClass<*>,
+    dest: KClass<*>,
+) {
     // 0. get the properties of the source type
-    val srcProps = this::class.memberProperties
+    val srcProps = src.memberProperties
 
     // 1. Select a constructor with a matching parameter
     // for each property from the source type
@@ -25,21 +28,25 @@ fun Any.mapTo(dest: KClass<*>): Any {
                         }
                     }
             }
+
     // 2. For each property associate the corresponding Parameter
     val params: Map<KProperty<*>, KParameter> =
         srcProps.associateWith { srcProp ->
             ctor.parameters.first { match(srcProp, it) }
         }
 
-    // 3. Collect the arguments to pass to the constructor
-    val args: Map<KParameter, Any?> =
-        params.entries.associate { (srcProp, destParam) ->
-            destParam to convert(this, srcProp, destParam)
-        }
+    fun mapFrom(from: Any?): Any? {
+        if (from == null) return null
+        // 3. Collect the arguments to pass to the constructor
+        val args: Map<KParameter, Any?> =
+            params.entries.associate { (srcProp, destParam) ->
+                destParam to convert(from, srcProp, destParam)
+            }
 
-    // Call the constructor via Reflect that instantiates the object
-    // and call the constructor
-    return ctor.callBy(args)
+        // Call the constructor via Reflect that instantiates the object
+        // and call the constructor
+        return ctor.callBy(args)
+    }
 }
 
 fun convert(
@@ -51,19 +58,22 @@ fun convert(
     return if (srcProp.returnType == destParam.type) {
         srcValue
     } else if (srcValue is Iterable<*> && destParam.type.isSubtypeOf(typeOf<Iterable<*>>())) {
-        srcValue.map { item ->
-            item?.mapTo(
-                destParam.type.arguments
-                    .first()
-                    .type
-                    ?.classifier as KClass<*>,
-            )
-        }
+        val srcKlass = srcProp.returnType.arguments
+            .first()
+            .type
+            ?.classifier as KClass<*>
+        val destKlass = destParam.type.arguments
+            .first()
+            .type
+            ?.classifier as KClass<*>
+        val mapper = MapperOpt(srcKlass, destKlass)
+        srcValue.map { item -> mapper.mapFrom(item) }
     } else {
+        val srcKlass = srcProp.returnType.classifier as KClass<*>
         val destKlass = destParam.type.classifier as KClass<*>
-        srcValue?.mapTo(destKlass)
+        MapperOpt(srcKlass, destKlass).mapFrom(srcValue)
     }
-}
+}x
 
 fun match(
     srcProp: KProperty<*>,
