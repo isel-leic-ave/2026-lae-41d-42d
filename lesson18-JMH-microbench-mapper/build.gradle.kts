@@ -11,12 +11,13 @@ dependencies {
     implementation(project(":lesson12-domain-model"))
     implementation(project(":lesson15-naive-mapper-via-constructor"))
     implementation(project(":lesson18-naive-mapper-opt"))
+    implementation(project(":lesson24-dynamic-mapper"))
 
     testImplementation(kotlin("test"))
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(24)
     }
 }

@@ -4,7 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class TestBenchMapper {
-    private val ze = PersonDto("Ze Manel", "Portugal")
+    private val ze = PersonDto("Ze Manel", "Portugal", 17)
 
     private val muse =
         ArtistDto(
@@ -24,6 +24,27 @@ class TestBenchMapper {
         val p2 = ze.mapTo(Person::class) as Person
         assertEquals(p1.name, p2.name)
         assertEquals(p1.country, p2.country)
+        assertEquals(p1.bornYear, p2.bornYear)
+    }
+
+    @Test
+    fun testReflectMapperOptPerson() {
+        val mapper = MapperOpt(PersonDto::class, Person::class)
+        val p1 = ze.toPerson()
+        val p2 = mapper.mapFrom(ze)
+        assertEquals(p1.name, p2.name)
+        assertEquals(p1.country, p2.country)
+        assertEquals(p1.bornYear, p2.bornYear)
+    }
+
+    @Test
+    fun testDynamicMapperPerson() {
+        val mapper = loadDynamicMapper(PersonDto::class, Person::class)
+        val p1 = ze.toPerson()
+        val p2 = mapper.mapFrom(ze)
+        assertEquals(p1.name, p2.name)
+        assertEquals(p1.country, p2.country)
+        assertEquals(p1.bornYear, p2.bornYear)
     }
 
     @Test
@@ -39,11 +60,5 @@ class TestBenchMapper {
             assertEquals(t.title, t2.title)
             assertEquals(t.year, t2.year)
         }
-    }
-
-    @Test
-    fun testReflectMapperOptPerson() {
-//        val mapper = MapperOpt(PersonDto::class, Person::class)
-//        mapper.mapFrom(dto)
     }
 }

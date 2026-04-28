@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
 open class BenchMapper {
-    private val ze = PersonDto("Ze Manel", "Portugal")
+    private val ze = PersonDto("Ze Manel", "Portugal", 17)
 
     private val muse =
         ArtistDto(
@@ -31,6 +31,7 @@ open class BenchMapper {
         )
 
     private val personMapper = MapperOpt(PersonDto::class, Person::class)
+    private val personMapperDynamic = loadDynamicMapper(PersonDto::class, Person::class)
     private val artistMapper = MapperOpt(ArtistDto::class, Artist::class)
 
     @Benchmark
@@ -40,7 +41,10 @@ open class BenchMapper {
     fun mapperPersonReflect(): Person = ze.mapTo(Person::class) as Person
 
     @Benchmark
-    fun mapperPersonReflectOpt(): Person = personMapper.mapFrom(ze) as Person
+    fun mapperPersonReflectOpt(): Person = personMapper.mapFrom(ze)
+
+    @Benchmark
+    fun mapperPersonDynamic(): Person = personMapperDynamic.mapFrom(ze)
 
     @Benchmark
     fun mapperArtistBaseline(): Artist = muse.toArtist()
@@ -49,5 +53,5 @@ open class BenchMapper {
     fun mapperArtistReflect(): Artist = muse.mapTo(Artist::class) as Artist
 
     @Benchmark
-    fun mapperArtistReflectOpt(): Artist = artistMapper.mapFrom(muse) as Artist
+    fun mapperArtistReflectOpt(): Artist = artistMapper.mapFrom(muse)
 }
