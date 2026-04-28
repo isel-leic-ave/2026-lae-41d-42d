@@ -29,9 +29,9 @@ class SongDto(
 class MapperOptTest {
     @Test
     fun `Test mapping PersonDto to Person`() {
-        val mapper = MapperOpt(PersonDto::class, Person::class)
+        val mapper: MapperOpt<PersonDto, Person> = MapperOpt(PersonDto::class, Person::class)
         val dto = PersonDto("Maria", "Portugal", 2001)
-        val person = mapper.mapFrom(dto) as Person
+        val person = mapper.mapFrom(dto)
         assertEquals("Maria", person.name)
         assertEquals("Portugal", person.country)
         assertEquals(2001, person.bornYear)
@@ -53,7 +53,7 @@ class MapperOptTest {
                 songs,
             )
         val mapper = MapperOpt(ArtistDto::class, Artist::class)
-        val artist = mapper.mapFrom(dto) as Artist
+        val artist = mapper.mapFrom(dto)
         assertEquals("Muse", artist.name)
         assertEquals("Band", artist.kind)
         assertEquals("UK", artist.country.name)
