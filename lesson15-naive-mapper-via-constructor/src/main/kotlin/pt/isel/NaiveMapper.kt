@@ -42,7 +42,7 @@ fun Any.mapTo(dest: KClass<*>): Any {
     return ctor.callBy(args)
 }
 
-fun convert(
+private fun convert(
     src: Any,
     srcProp: KProperty<*>,
     destParam: KParameter,
@@ -65,7 +65,7 @@ fun convert(
     }
 }
 
-fun match(
+private fun match(
     srcProp: KProperty<*>,
     destParam: KParameter,
 ): Boolean {
