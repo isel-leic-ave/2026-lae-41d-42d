@@ -1,8 +1,10 @@
 package pt.isel
 
 import java.io.File
+import java.lang.classfile.ClassBuilder
 import java.lang.classfile.ClassFile
 import java.lang.classfile.ClassFile.ACC_PUBLIC
+import java.lang.classfile.CodeBuilder
 import java.lang.classfile.Interfaces
 import java.lang.constant.ClassDesc
 import java.lang.constant.ConstantDescs.CD_Object
@@ -17,6 +19,7 @@ import java.lang.constant.ConstantDescs.CD_void
 import java.lang.constant.ConstantDescs.INIT_NAME
 import java.lang.constant.ConstantDescs.MTD_void
 import java.lang.constant.MethodTypeDesc
+import java.net.URLClassLoader
 import kotlin.reflect.KClass
 import kotlin.reflect.KParameter
 import kotlin.reflect.KProperty
@@ -31,6 +34,9 @@ private val root =
         .getResource("/")
         ?.toURI()
         ?.path
+        ?: "${System.getProperty("user.dir")}/"
+
+private val rootLoader = URLClassLoader(arrayOf(File(root).toURI().toURL()))
 
 /**
  * Cache of dynamically generated mappers keyed by the domain class.
@@ -146,14 +152,18 @@ private fun <T : Any, R : Any> buildMapper(
                         cob
                             .new_(ClassDesc.of(dest.qualifiedName))
                             .dup()
-                        params.forEach { (srcProp, _) ->
-                            cob
-                                .aload(1)
-                                .invokevirtual(
-                                    ClassDesc.of(src.qualifiedName),
-                                    srcProp.javaGetter?.name,
-                                    MethodTypeDesc.of(srcProp.returnType.descriptor()),
-                                )
+                        params.forEach { (srcProp, destParam) ->
+                            if (srcProp.returnType.toKClass().isPrimitiveOrString()) {
+                                cob
+                                    .aload(1)
+                                    .invokevirtual(
+                                        ClassDesc.of(src.qualifiedName),
+                                        srcProp.javaGetter?.name,
+                                        MethodTypeDesc.of(srcProp.returnType.descriptor()),
+                                    )
+                            } else {
+                                cob.builMapComplexProp(clb, src, srcProp, destParam)
+                            }
                         }
                         cob.invokespecial(
                             dest.descriptor(),
@@ -181,17 +191,80 @@ private fun <T : Any, R : Any> buildMapper(
                     }
                 }
         }
-    val resourcePath =
-        Unit::class.java
-            .getResource("/")
-            ?.toURI()
-            ?.path
-    File(resourcePath, className.replace('.', '/') + ".class")
+
+    File(root, className.replace('.', '/') + ".class")
         .also { it.parentFile.mkdirs() } // Create directories if they do not exist
         .writeBytes(bytes)
-    return Unit::class.java.classLoader
+
+    return rootLoader
         .loadClass(className)
         .kotlin
+}
+
+private fun CodeBuilder.builMapComplexProp(
+    clb: ClassBuilder,
+    owner: KClass<*>,
+    srcProp: KProperty<*>,
+    destParam: KParameter,
+) {
+    /*
+    ldc           #18                 // class pt/isel/StateDto
+    ldc           #20                 // class pt/isel/Country
+    invokestatic  #22                 // Method pt/isel/DynamicMapperKt.loadDynamicMapper:(Ljava/lang/Class;Ljava/lang/Class;)Lpt/isel/Mapper;
+    aload_1
+    invokevirtual #28                 // Method pt/isel/ArtistDto.getCountry:()Lpt/isel/StateDto;
+    invokeinterface #32,  2           // InterfaceMethod pt/isel/Mapper.mapFrom:(Ljava/lang/Object;)Ljava/lang/Object;
+    checkcast     #20                 // class pt/isel/Country
+     */
+    val srcPropType =
+        if (srcProp.returnType.classifier != List::class) {
+            srcProp.returnType
+        } else {
+            srcProp.returnType.arguments
+                .first()
+                .type!!
+        }
+    val destParamType =
+        if (destParam.type.classifier != List::class) {
+            destParam.type
+        } else {
+            destParam.type.arguments
+                .first()
+                .type!!
+        }
+    ldc(clb.constantPool().classEntry(srcPropType.descriptor()))
+    ldc(clb.constantPool().classEntry(destParamType.descriptor()))
+    invokestatic(
+        ClassDesc.of("pt.isel.DynamicMapperKt"),
+        "loadDynamicMapper",
+        MethodTypeDesc.of(
+            Mapper::class.descriptor(),
+            Class::class.descriptor(),
+            Class::class.descriptor(),
+        ),
+    )
+    aload(1)
+    invokevirtual(
+        ClassDesc.of(owner.qualifiedName),
+        srcProp.javaGetter?.name,
+        MethodTypeDesc.of(srcProp.returnType.descriptor()),
+    )
+    if(srcProp.returnType.classifier != List::class) {
+        invokeinterface(
+            Mapper::class.descriptor(),
+            "mapFrom",
+            MethodTypeDesc.of(CD_Object, CD_Object),
+        )
+    } else {
+        invokeinterface(
+            Mapper::class.descriptor(),
+            "mapFromList",
+            MethodTypeDesc.of(List::class.descriptor(), List::class.descriptor()),
+        )
+    }
+    if(srcProp.returnType.classifier != List::class) {
+        checkcast(destParam.type.descriptor())
+    }
 }
 
 private fun match(
@@ -248,3 +321,14 @@ fun KType.descriptor(): ClassDesc {
     val klass = this.classifier as KClass<*>
     return klass.descriptor()
 }
+
+fun KType.toKClass() =
+    if (classifier == List::class) {
+        arguments[0]
+            .type
+            ?.classifier as KClass<*>
+    } else {
+        classifier as KClass<*>
+    }
+
+fun KClass<*>.isPrimitiveOrString() = this.java.isPrimitive || this == String::class

@@ -33,6 +33,7 @@ open class BenchMapper {
     private val personMapper = MapperOpt(PersonDto::class, Person::class)
     private val personMapperDynamic = loadDynamicMapper(PersonDto::class, Person::class)
     private val artistMapper = MapperOpt(ArtistDto::class, Artist::class)
+    private val artistMapperDynamic = loadDynamicMapper(ArtistDto::class, Artist::class)
 
     @Benchmark
     fun mapperPersonBaseline(): Person = ze.toPerson()
@@ -54,4 +55,7 @@ open class BenchMapper {
 
     @Benchmark
     fun mapperArtistReflectOpt(): Artist = artistMapper.mapFrom(muse)
+
+    @Benchmark
+    fun mapperArtistDynamic(): Artist = artistMapperDynamic.mapFrom(muse)
 }
