@@ -6,6 +6,7 @@ import org.openjdk.jmh.annotations.Mode
 import org.openjdk.jmh.annotations.OutputTimeUnit
 import org.openjdk.jmh.annotations.Scope
 import org.openjdk.jmh.annotations.State
+import org.openjdk.jmh.infra.Blackhole
 import java.util.concurrent.TimeUnit
 
 /**
@@ -20,17 +21,17 @@ open class BenchLogger {
     private val out = StringBuilder()
 
     @Benchmark
-    fun benchRectangleLogBaseline(): String {
+    fun benchRectangleLogBaseline(bh: Blackhole) {
         out.clear()
         rect.logTo(out)
-        return out.toString()
+        bh.consume(out)
     }
 
     @Benchmark
-    fun benchRectangleLogReflect(): String {
+    fun benchRectangleLogReflect(bh: Blackhole) {
         out.clear()
         out.log(rect)
-        return out.toString()
+        bh.consume(out)
     }
 }
 
