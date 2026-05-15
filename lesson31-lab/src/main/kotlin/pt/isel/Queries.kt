@@ -46,27 +46,40 @@ fun <T> Sequence<T>.lazyFilter(predicate: (T) -> Boolean): Sequence<T> {
     return object : Sequence<T> {
         override fun iterator(): Iterator<T> {
             val upstream = this@lazyFilter.iterator()
+
             return object : Iterator<T> {
                 private var nextItem: T? = null
                 private var nextReady = false
+                private var computed = false
 
-                override fun hasNext(): Boolean {
+                private fun computeNext() {
                     while (upstream.hasNext()) {
                         val item = upstream.next()
                         if (predicate(item)) {
                             nextItem = item
                             nextReady = true
-                            return true
+                            computed = true
+                            return
                         }
                     }
-                    return false
+                    nextReady = false
+                    computed = true
+                }
+
+                override fun hasNext(): Boolean {
+                    if (!computed) {
+                        computeNext()
+                    }
+                    return nextReady
                 }
 
                 override fun next(): T {
-                    if (!nextReady && !hasNext()) {
-                        throw NoSuchElementException()
+                    if (!computed) {
+                        computeNext()
                     }
-                    nextReady = false
+                    if (!nextReady) throw NoSuchElementException()
+
+                    computed = false
                     return nextItem as T
                 }
             }
