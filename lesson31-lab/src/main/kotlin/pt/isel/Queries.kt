@@ -12,11 +12,33 @@ fun <T, R> Iterable<T>.eagerMap(transform: (T) -> R): List<R> {
     return destination
 }
 
+fun <T, R> Sequence<T>.suspMap(transform: (T) -> R): Sequence<R> =
+    sequence {
+        for (item in this@suspMap) {
+            yield(transform(item))
+        }
+    }
+
 /**
  * Returns a list containing only elements matching the given predicate.
  */
+fun <T> Sequence<T>.suspFilter(predicate: (T) -> Boolean): Sequence<T> =
+    sequence {
+        for (element in this@suspFilter) {
+            if (predicate(element)) {
+                yield(element)
+            }
+        }
+    }
+
 fun <T> Iterable<T>.eagerFilter(predicate: (T) -> Boolean): Iterable<T> {
-    TODO()
+    val destination = mutableListOf<T>()
+    for (element in this) {
+        if (predicate(element)) {
+            destination.add(element)
+        }
+    }
+    return destination
 }
 
 /**
@@ -34,9 +56,17 @@ fun <T> Iterable<T>.eagerDistinct(): Iterable<T> {
  * Returns a sequence containing the results of applying the given
  * transform function to each element in the original collection.
  */
-fun <T, R> Sequence<T>.lazyMap(transform: (T) -> R): Sequence<R> {
-    TODO()
-}
+fun <T, R> Sequence<T>.lazyMap(transform: (T) -> R): Sequence<R> =
+    object : Sequence<R> {
+        override fun iterator(): Iterator<R> =
+            object : Iterator<R> {
+                val upstream = this@lazyMap.iterator()
+
+                override fun next(): R = transform(upstream.next())
+
+                override fun hasNext(): Boolean = upstream.hasNext()
+            }
+    }
 
 /**
  * Returns a sequence containing only elements matching the given [predicate].
@@ -98,9 +128,26 @@ fun <T> Sequence<T>.lazyDistinct(): Sequence<T> {
  * Returns a sequence containing all elements of original sequence and
  * then all elements of the given elements sequence.
  */
-fun <T> Sequence<T>.lazyConcat(other: Sequence<T>): Sequence<T> {
-    TODO()
-}
+fun <T> Sequence<T>.lazyConcat(other: Sequence<T>): Sequence<T> =
+    object : Sequence<T> {
+        override fun iterator(): Iterator<T> =
+            object : Iterator<T> {
+                val upstream = this@lazyConcat.iterator()
+                val otherUpstream = other.iterator()
+
+                override fun next(): T {
+                    if (upstream.hasNext()) {
+                        return upstream.next()
+                    } else if (otherUpstream.hasNext()) {
+                        return otherUpstream.next()
+                    } else {
+                        throw NoSuchElementException()
+                    }
+                }
+
+                override fun hasNext(): Boolean = upstream.hasNext() || otherUpstream.hasNext()
+            }
+    }
 
 /**
  * Merges series of adjacent elements.
